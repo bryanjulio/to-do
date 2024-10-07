@@ -7,7 +7,7 @@ import Scene from "../components/Scene";
 
 import "../assets/styles/Home.css";
 import { Link } from "react-router-dom";
-import AnimatedSpriteTalking from "../components/AnimatedSpriteTalking"; // Importa corretamente o componente de animação
+import AnimatedSpriteTalking from "../components/AnimatedSpriteTalking";
 import { TypeAnimation } from "react-type-animation";
 import HWO from "../components/HWO";
 
@@ -35,7 +35,7 @@ const Home = () => {
   const [startZoom, setStartZoom] = useState(false); // Controla quando iniciar o zoom
   const [overlayActive, setOverlayActive] = useState(true); // Controla a exibição do overlay
   const [fadeOut, setFadeOut] = useState(false); // Controla a transição de fade-out
-  const [cardStep, setCardStep] = useState(1); // Controla o passo do card
+  const [cardStep, setCardStep] = useState(-1); // Inicializa como -1 indicando que ainda não começou
   const [astronautReaction, setAstronautReaction] = useState("normal"); // Controla a reação do astronauta
   const [astronautVisible, setAstronautVisible] = useState(true); // Controla a visibilidade do astronauta
 
@@ -44,7 +44,7 @@ const Home = () => {
 
   // Mapeamento das etapas para os arquivos de áudio
   const audioMap = {
-    intro: "/audios/intro.mp3",
+    0: "/audios/intro.mp3",
     1: "/audios/audio1.mp3",
     2: "/audios/audio2.mp3",
     3: "/audios/audio3.mp3",
@@ -52,6 +52,7 @@ const Home = () => {
 
   // Função para tocar o áudio correspondente à etapa atual
   const playAudio = (step) => {
+    console.log(`Reproduzindo áudio para o passo: ${step}`); // Log de depuração
     // Parar o áudio atual, se existir
     if (audioRef.current) {
       audioRef.current.pause();
@@ -59,59 +60,43 @@ const Home = () => {
     }
 
     // Determinar o arquivo de áudio a ser tocado
-    let audioSrc = "";
-    if (!hasStarted) {
-      audioSrc = audioMap.intro;
-    } else {
-      audioSrc = audioMap[step];
-    }
+    const audioSrc = audioMap[step];
+    console.log(`Arquivo de áudio selecionado: ${audioSrc}`); // Log de depuração
 
     if (audioSrc) {
       const audio = new Audio(audioSrc);
       audioRef.current = audio;
-      audio.play();
+      audio.play().catch((error) => {
+        console.error(`Erro ao reproduzir o áudio: ${error}`);
+      });
+    } else {
+      console.warn(`Nenhum áudio encontrado para o passo: ${step}`);
     }
   };
 
-  // Efeito para tocar o áudio inicial (intro) quando o componente monta
-  useEffect(() => {
-    if (!hasStarted) {
-      playAudio("intro");
-    }
-
-    // Limpar o áudio ao desmontar o componente
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Efeito para tocar o áudio correspondente quando a etapa muda
   useEffect(() => {
-    if (hasStarted && showInfoCard) {
+    if (hasStarted && showInfoCard && cardStep >= 0) {
       playAudio(cardStep);
     }
 
-    // Limpar o áudio quando a etapa muda
+    // Limpar o áudio quando a etapa muda ou o componente desmonta
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardStep, hasStarted, showInfoCard]);
 
   const startAction = () => {
     console.log("Tecla pressionada ou clique detectado");
     setHasStarted(true);
     setShowInfoCard(true);
+    setCardStep(0); // Define para 0 para tocar 'intro'
     setFadeOut(true); // Inicia o fade-out do overlay
 
-    // Parar o áudio de intro, se estiver tocando
+    // Parar o áudio atual, se estiver tocando
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -138,14 +123,15 @@ const Home = () => {
   // Função para lidar com o clique no botão Next e mudar o conteúdo do card
   const handleNextClick = () => {
     setCardStep((prevStep) => {
-      if (prevStep === 1) {
+      const nextStep = prevStep + 1;
+      console.log(`Avançando para o passo: ${nextStep}`); // Log de depuração
+
+      if (nextStep === 1) {
         setAstronautReaction("pointing");
-        return 2;
-      } else if (prevStep === 2) {
+      } else if (nextStep === 2) {
         setAstronautReaction("thumbsUp");
-        return 3;
-      } else if (prevStep === 3) {
-        // Aqui implementamos o fade-out do astronauta
+      } else if (nextStep === 3) {
+        // Implementa o fade-out do astronauta
         setAstronautVisible(false); // Inicia o fade-out do astronauta
         setTimeout(() => {
           setShowInfoCard(false); // Após o fade-out, esconde o card
@@ -154,10 +140,9 @@ const Home = () => {
             setCanControlView(true); // Habilita o controle da câmera depois do zoom
           }, 3000); // Tempo para a animação de zoom
         }, 1000); // Tempo para a animação de fade-out do astronauta
-        return prevStep; // Não incrementa mais o cardStep, já que estamos no último passo
-      } else {
-        return prevStep;
       }
+
+      return nextStep;
     });
   };
 
@@ -207,71 +192,66 @@ const Home = () => {
       )}
 
       {showInfoCard && (
-        <>
-          <div className="info-card">
-            {/* O conteúdo do card muda de acordo com o cardStep */}
-            {cardStep === 1 ? (
-              <>
-                <TypeAnimation
-                  key={cardStep} // Adiciona a key para forçar o re-render ao mudar o cardStep
-                  sequence={[
-                    "Hi there! I’m Walter, your guide on this space adventure. Today, we’re going to explore distant planets and discover new worlds through the HWO, NASA’s newest telescope. It’s designed to find Earth-like planets around nearby stars and search for signs of life. Ready to dive in?", // Texto a ser escrito
-                    1000, // Pausa de 1 segundo
-                  ]}
-                  speed={75}
-                  wrapper="span"
-                  cursor={true} // Mostra o cursor piscando
-                  repeat={0} // Não repete a animação
-                />
-              </>
-            ) : cardStep === 2 ? (
-              <>
-                <TypeAnimation
-                  key={cardStep} // Adiciona a key para forçar o re-render ao mudar o cardStep
-                  sequence={[
-                    "The HWO is positioned at Lagrange Point 2 (L2), 1.5 million km from Earth, where it has a perfect view of deep space.", // Novo texto da segunda etapa
-                    1000, // Pausa de 1 segundo
-                  ]}
-                  speed={75}
-                  wrapper="span"
-                  cursor={true}
-                  repeat={0}
-                />
-              </>
-            ) : cardStep === 3 ? (
-              <>
-                <TypeAnimation
-                  key={cardStep} // Adiciona a key para forçar o re-render ao mudar o cardStep
-                  sequence={[
-                    "In this app, you’ll explore exoplanets through HWO’s eyes, learning about planets that might support life. Join me on a guided tour or explore freely!", // Novo texto da terceira etapa
-                    1000,
-                  ]}
-                  speed={75}
-                  wrapper="span"
-                  cursor={true}
-                  repeat={0}
-                />
-              </>
-            ) : (
-              <>
-                <TypeAnimation
-                  key={cardStep} // Adiciona a key para forçar o re-render ao mudar o cardStep
-                  sequence={[
-                    "All steps are completed.", // Texto quando todas as etapas são concluídas
-                    1000,
-                  ]}
-                  speed={75}
-                  wrapper="span"
-                  cursor={false} // Cursor desaparece ao final
-                  repeat={0}
-                />
-              </>
-            )}
+        <div className="info-card">
+          {/* O conteúdo do card muda de acordo com o cardStep */}
+          {cardStep === 0 && (
+            <TypeAnimation
+              key={cardStep}
+              sequence={[
+                "Hi there! I’m Walter, your guide on this space adventure. Today, we’re going to explore distant planets and discover new worlds through the HWO, NASA’s newest telescope. It’s designed to find Earth-like planets around nearby stars and search for signs of life. Ready to dive in?",
+                1000,
+              ]}
+              speed={75}
+              wrapper="span"
+              cursor={true}
+              repeat={0}
+            />
+          )}
+          {cardStep === 1 && (
+            <TypeAnimation
+              key={cardStep}
+              sequence={[
+                "The HWO is positioned at Lagrange Point 2 (L2), 1.5 million km from Earth, where it has a perfect view of deep space.",
+                1000,
+              ]}
+              speed={75}
+              wrapper="span"
+              cursor={true}
+              repeat={0}
+            />
+          )}
+          {cardStep === 2 && (
+            <TypeAnimation
+              key={cardStep}
+              sequence={[
+                "In this app, you’ll explore exoplanets through HWO’s eyes, learning about planets that might support life. Join me on a guided tour or explore freely!",
+                1000,
+              ]}
+              speed={75}
+              wrapper="span"
+              cursor={true}
+              repeat={0}
+            />
+          )}
+          {cardStep === 3 && (
+            <TypeAnimation
+              key={cardStep}
+              sequence={[
+                "All steps are completed.",
+                1000,
+              ]}
+              speed={75}
+              wrapper="span"
+              cursor={false}
+              repeat={0}
+            />
+          )}
+          {cardStep < 3 && (
             <button className="fixed-btn" onClick={handleNextClick}>
               Next
             </button>
-          </div>
-        </>
+          )}
+        </div>
       )}
 
       {/* Exibe a animação do astronauta */}
