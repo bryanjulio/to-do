@@ -47,7 +47,7 @@ const Home = () => {
     0: "/audios/intro.mp3",
     1: "/audios/audio1.mp3",
     2: "/audios/audio2.mp3",
-    3: "/audios/audio3.mp3",
+ 
   };
 
   // Função para tocar o áudio correspondente à etapa atual
@@ -126,20 +126,20 @@ const Home = () => {
       const nextStep = prevStep + 1;
       console.log(`Avançando para o passo: ${nextStep}`); // Log de depuração
 
-      if (nextStep === 1) {
+      if (nextStep === 0) {
         setAstronautReaction("pointing");
-      } else if (nextStep === 2) {
+      } else if (nextStep === 1) {
         setAstronautReaction("thumbsUp");
-      } else if (nextStep === 3) {
-        // Implementa o fade-out do astronauta
-        setAstronautVisible(false); // Inicia o fade-out do astronauta
+      } else if (nextStep === 2) {
+     
         setTimeout(() => {
+          setAstronautVisible(false); 
           setShowInfoCard(false); // Após o fade-out, esconde o card
           setStartZoom(true); // Ativa o zoom
           setTimeout(() => {
             setCanControlView(true); // Habilita o controle da câmera depois do zoom
           }, 3000); // Tempo para a animação de zoom
-        }, 1000); // Tempo para a animação de fade-out do astronauta
+        }, 12000); // Tempo para a animação de fade-out do astronauta
       }
 
       return nextStep;
@@ -233,20 +233,8 @@ const Home = () => {
               repeat={0}
             />
           )}
-          {cardStep === 3 && (
-            <TypeAnimation
-              key={cardStep}
-              sequence={[
-                "All steps are completed.",
-                1000,
-              ]}
-              speed={75}
-              wrapper="span"
-              cursor={false}
-              repeat={0}
-            />
-          )}
-          {cardStep < 3 && (
+         
+          {cardStep < 2 && (
             <button className="fixed-btn" onClick={handleNextClick}>
               Next
             </button>
