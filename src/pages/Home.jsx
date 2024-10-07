@@ -131,14 +131,21 @@ const Home = () => {
       } else if (nextStep === 1) {
         setAstronautReaction("thumbsUp");
       } else if (nextStep === 2) {
-     
+        setAstronautReaction("pointing");
         setTimeout(() => {
+          
+        
+          setAstronautReaction("normal");
+        }, 11200); // Tempo para a animação de fade-out do astronauta
+        setTimeout(() => {
+          
           setAstronautVisible(false); 
           setShowInfoCard(false); // Após o fade-out, esconde o card
           setStartZoom(true); // Ativa o zoom
           setTimeout(() => {
             setCanControlView(true); // Habilita o controle da câmera depois do zoom
           }, 3000); // Tempo para a animação de zoom
+         
         }, 12000); // Tempo para a animação de fade-out do astronauta
       }
 
