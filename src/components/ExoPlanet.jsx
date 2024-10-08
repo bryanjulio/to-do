@@ -1,63 +1,155 @@
 // ExoPlanet.js
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import starsData from '../data/dados_exoplanetas.json';
+import { 
+  FaTemperatureHigh, 
+  FaWeightHanging, 
+  FaRulerHorizontal, 
+  FaMicroscope, 
+  FaMapMarkerAlt, 
+  FaStar, 
+  FaArrowLeft 
+} from 'react-icons/fa';
 
+/**
+ * Component that displays details of a star and its associated exoplanets.
+ */
 const ExoPlanet = () => {
   const { name } = useParams();
+  const navigate = useNavigate(); // Hook for programmatic navigation
 
-  // Filtra todas as entradas que correspondem ao hostname
+  // Filter all entries that match the hostname
   const starEntries = starsData.filter(star => star.hostname === name);
 
   if (starEntries.length === 0) {
-    return <div className="text-center text-red-500 mt-10">Estrela não encontrada.</div>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-900 text-red-500">
+        <p>Star not found.</p>
+      </div>
+    );
   }
 
-  // Obtém os dados da estrela (assumindo que são iguais em todas as entradas)
+  // Get the star data (assuming they are identical across entries)
   const starData = starEntries[0];
 
-  // Extrai os exoplanetas associados
+  // Extract associated exoplanets
   const planets = starEntries.map(entry => ({
-    id: entry.id, // Usando 'id' como identificador único do exoplaneta
+    id: entry.id, // Using 'id' as the unique identifier for the exoplanet
     name: entry.pl_name,
-    mass: entry.pl_bmassj || 'Desconhecida', // Massa em massas de Júpiter
-    radius: entry.pl_rade || 'Desconhecido', // Raio em raios de Júpiter
-    orbitalPeriod: entry.pl_orbper || 'Desconhecido', // Período orbital em dias
+    mass: entry.pl_bmasse || 'Unknown', // Mass in Earth masses
+    radius: entry.pl_rade || 'Unknown', // Radius in Earth radii
+    orbitalPeriod: entry.pl_orbper || 'Unknown', // Orbital period in days
   }));
 
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Detalhes da Estrela: {name}</h1>
-      <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-8">
-        <p><span className="font-semibold">Temperatura Efetiva:</span> {starData.st_teff || 'Desconhecida'} K</p>
-        <p><span className="font-semibold">Massa:</span> {starData.st_mass || 'Desconhecida'} Massas Solares</p>
-        <p><span className="font-semibold">Raio:</span> {starData.st_rad || 'Desconhecido'} Raios Solares</p>
-        <p><span className="font-semibold">Metalicidade:</span> {starData.st_met || 'Desconhecida'}</p>
-        <p><span className="font-semibold">RA:</span> {starData.ra || 'Desconhecido'} graus</p>
-        <p><span className="font-semibold">DEC:</span> {starData.dec || 'Desconhecido'} graus</p>
-        <p><span className="font-semibold">Distância:</span> {starData.sy_dist || 'Desconhecida'} parsecs</p>
-      </div>
+  // Function to handle "Back" button click
+  const handleBack = () => {
+    navigate('/hwo');
+  };
 
-      <h2 className="text-2xl font-semibold mb-4">Exoplanetas Associados</h2>
-      {planets.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {planets.map((planet) => (
-            <div key={planet.id} className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold mb-2">{planet.name}</h3>
-              <p><span className="font-semibold">Massa:</span> {planet.mass} M<sub>Júpiter</sub></p>
-              <p><span className="font-semibold">Raio:</span> {planet.radius} R<sub>Júpiter</sub></p>
-              <p><span className="font-semibold">Período Orbital:</span> {planet.orbitalPeriod} dias</p>
-              <Link to={`/exoplanet/${planet.id}`}>
-                <button className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-                  Visitar Exoplaneta
-                </button>
-              </Link>
+  return (
+    <div className="min-h-screen  text-white p-24">
+      {/* Header */}
+      <header className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold">Star Details: {name}</h1>
+        {/* Back Button */}
+        <button 
+          className="flex items-center bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-300"
+          onClick={handleBack}
+        >
+          <FaArrowLeft className="mr-2" /> Back
+        </button>
+      </header>
+
+      {/* Star Details Section */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">Star Properties</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Effective Temperature */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+            <FaTemperatureHigh className="text-blue-500 text-3xl mr-4" />
+            <div>
+              <h3 className="text-lg font-bold">Effective Temperature</h3>
+              <p>{starData.st_teff ? `${starData.st_teff} K` : 'Unknown'}</p>
             </div>
-          ))}
+          </div>
+
+          {/* Mass */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+            <FaWeightHanging className="text-green-500 text-3xl mr-4" />
+            <div>
+              <h3 className="text-lg font-bold">Mass</h3>
+              <p>{starData.st_mass ? `${starData.st_mass} Solar Masses` : 'Unknown'}</p>
+            </div>
+          </div>
+
+          {/* Radius */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+            <FaRulerHorizontal className="text-yellow-500 text-3xl mr-4" />
+            <div>
+              <h3 className="text-lg font-bold">Radius</h3>
+              <p>{starData.st_rad ? `${starData.st_rad} Solar Radii` : 'Unknown'}</p>
+            </div>
+          </div>
+
+          {/* Metallicity */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+            <FaMicroscope className="text-purple-500 text-3xl mr-4" />
+            <div>
+              <h3 className="text-lg font-bold">Metallicity</h3>
+              <p>{starData.st_met !== null ? starData.st_met : 'Unknown'}</p>
+            </div>
+          </div>
+
+          {/* Distance */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+            <FaMapMarkerAlt className="text-red-500 text-3xl mr-4" />
+            <div>
+              <h3 className="text-lg font-bold">Distance</h3>
+              <p>
+                {starData.sy_dist 
+                  ? `${starData.sy_dist} parsecs (~${(starData.sy_dist * 3.26).toFixed(2)} light-years)`
+                  : 'Unknown'}
+              </p>
+            </div>
+          </div>
+
+          {/* Spectral Type */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+            <FaStar className="text-indigo-500 text-3xl mr-4" />
+            <div>
+              <h3 className="text-lg font-bold">Spectral Type</h3>
+              <p>{starData.st_spectype || 'Unknown'}</p>
+            </div>
+          </div>
         </div>
-      ) : (
-        <p>Nenhum exoplaneta associado encontrado.</p>
-      )}
+      </section>
+
+      {/* Associated Exoplanets Section */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-6">Associated Exoplanets</h2>
+        {planets.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {planets.map((planet) => (
+              <div key={planet.id} className="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
+                <h3 className="text-xl font-bold mb-4">{planet.name}</h3>
+                <div className="flex-1">
+                  <p className="mb-2"><span className="font-semibold">Mass:</span> {planet.mass !== 'Unknown' ? `${planet.mass} Earth Masses` : 'Unknown'}</p>
+                  <p className="mb-2"><span className="font-semibold">Radius:</span> {planet.radius !== 'Unknown' ? `${planet.radius} Earth Radii` : 'Unknown'}</p>
+                  <p className="mb-2"><span className="font-semibold">Orbital Period:</span> {planet.orbitalPeriod} days</p>
+                </div>
+                <Link to={`/exoplanet/${planet.id}`} className="mt-4">
+                  <button className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition duration-300">
+                    Visit Exoplanet
+                  </button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400">No associated exoplanets found.</p>
+        )}
+      </section>
     </div>
   );
 };
