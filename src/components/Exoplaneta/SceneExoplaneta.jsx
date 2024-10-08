@@ -52,7 +52,7 @@ const ExoplanetInfo = ({ exoplanet }) => {
         {/* Star Radius */}
         <div className="flex items-center mb-4 text-sm">
           <span className="mr-2">🌞</span>
-          <strong>Star Radius:</strong> {exoplanet.st_rad ? `${exoplanet.st_rad} Solar radius` : 'Unknown'}
+          <strong>Star Radius:</strong> {exoplanet.st_rad ? `${exoplanet.st_rad} Solar radii` : 'Unknown'}
         </div>
 
         {/* Star Luminosity */}
