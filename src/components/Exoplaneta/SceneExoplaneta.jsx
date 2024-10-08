@@ -89,8 +89,18 @@ function AppExoplanet() {
   const navigate = useNavigate();  // Hook to navigate to specific path
 
   // Função para lidar com o clique no botão "Back"
-  const handleClick = (name) => {
+  const handleBackClick = (name) => {
     navigate(`/hwo/${encodeURIComponent(name)}`);
+  };
+
+  // Função para lidar com o clique no botão "Início"
+  const handleHomeClick = () => {
+    navigate('/');  // Supondo que '/' seja a rota inicial
+  };
+
+  // Função para lidar com o clique no botão "About"
+  const handleAboutClick = () => {
+    navigate('/about');  // Supondo que '/about' seja a rota para a página "About"
   };
 
   // Find the exoplanet by its ID
@@ -123,9 +133,27 @@ function AppExoplanet() {
         <ExoplanetInfo exoplanet={exoplanet} />
       </div>
 
+      {/* Navigation Buttons */}
+      <div className="absolute top-5 right-5 flex space-x-2">
+        <button 
+          className="bg-blue-700 hover:bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md"
+          onClick={handleHomeClick}
+        >
+          Home
+        </button>
+        <button 
+          className="hover:bg-[#333366] hover:rounded-lg bg-[#1a1a40] border border-white  text-white py-2 px-4 rounded-lg shadow-md"
+          onClick={handleAboutClick}
+        >
+          About
+        </button>
+      </div>
+
       {/* Comparison with Earth */}
       <div className="absolute bottom-5 right-5 p-4 bg-gray-800 text-white rounded-lg shadow-lg">
         <h3 className="text-lg font-semibold mb-2">Comparison with Earth</h3>
+
+       
 
         {/* Mass */}
         <div className="flex items-center space-x-2 mb-2">
@@ -153,12 +181,13 @@ function AppExoplanet() {
           {calculateRadius(exoplanet.pl_bmasse) > 100 && <span>(Exceeds Earth's radius)</span>}
         </div>
       </div>
+      
 
       {/* Back button */}
       <div className="absolute bottom-5 left-5">
         <button 
           className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg"
-          onClick={() => handleClick(exoplanet.hostname)}  // Navigate to the specific path
+          onClick={() => handleBackClick(exoplanet.hostname)}  // Navigate to the specific path
         >
           Back
         </button>

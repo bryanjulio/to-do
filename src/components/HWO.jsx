@@ -1,15 +1,17 @@
 // src/components/HWO.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,  } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 
 import HostName from './HostName';
 import Stars from './Stars';
 import TutorialToast from './TutorialToast'; // Importando o componente TutorialToast
+import { useNavigate } from 'react-router-dom';
 
 const HWO = () => {
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const navigate = useNavigate(); 
 
   // Defina os caminhos das texturas das estrelas
   const starTextures = [
@@ -82,6 +84,15 @@ const HWO = () => {
     setIsTutorialOpen(false);
   };
 
+    // Função para lidar com o clique no botão "Início"
+    const handleHomeClick = () => {
+      navigate('/');  // Supondo que '/' seja a rota inicial
+    };
+  
+    // Função para lidar com o clique no botão "About"
+    const handleAboutClick = () => {
+      navigate('/about');  // Supondo que '/about' seja a rota para a página "About"
+    };
   return (
     <div className="relative">
       <Canvas
@@ -96,6 +107,21 @@ const HWO = () => {
         <HostName />
       </Canvas>
 
+   {/* Navigation Buttons */}
+   <div className="absolute top-5 right-5 flex space-x-2">
+        <button 
+          className="bg-blue-700 hover:bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md"
+          onClick={handleHomeClick}
+        >
+          Home
+        </button>
+        <button 
+          className="hover:bg-[#333366] hover:rounded-lg bg-[#1a1a40] border border-white  text-white py-2 px-4 rounded-lg shadow-md"
+          onClick={handleAboutClick}
+        >
+          About
+        </button>
+      </div>
       {/* Tutorial Toast */}
       {isTutorialOpen && currentStep < tutorialSteps.length && (
         <TutorialToast
