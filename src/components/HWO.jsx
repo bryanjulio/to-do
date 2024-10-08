@@ -30,10 +30,7 @@ const HWO = () => {
       message: "🔄 **Rotate:** Click and drag the mouse to rotate the view around the star.",
       image: null,
     },
-    {
-      message: "🔍 **Zoom:** Use the scroll wheel to zoom in and out.",
-      image: null,
-    },
+  
     {
       message: "🪐 **Explore:** Click on any exoplanet to learn more.",
       image: null,
